@@ -191,12 +191,16 @@ Output format: "[LOCATION] [property type] [trip purpose/vibe] [amenities]"
 Input: "{user_input}"
 Output:
 """
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0
-    )
-    return response.choices[0].message.content.strip()
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0
+        )
+        return response.choices[0].message.content.strip()
+    except Exception:
+        st.warning("🤖 AI is a little busy right now. Please try again in a moment!")
+        st.stop()
     
 def search_listings(user_input, room_type=None, superhost=None, max_price=None, neighbourhood=None, top_k=10):
     # 하드 필터: UI에서 선택한 것만
@@ -408,7 +412,8 @@ if search_clicked and search_input.strip():
                                 reason = reason.replace('$', '\\$')
                                 st.info(f"💬 {reason}")
                             except Exception:
-                                st.warning(f"⚠️ {str(e)}")
+                                st.warning("🤖 AI is a little busy right now. Please try again in a moment!")
+                                st.stop()
 
                     st.markdown(f"[View on Airbnb →]({row.get('listing_url', '#')})")
 
