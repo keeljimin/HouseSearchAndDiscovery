@@ -337,7 +337,9 @@ with col3:
     min_price, max_price = st.slider("Price", 0, 1000, (0, 300), step=10, format="$%d", label_visibility="collapsed")
 
 with col4:
-    min_rating = st.slider("Min Rating", 0.0, 5.0, 4.0, step=0.1, format="%.1f⭐")
+    rating_options = {"Any": 0.0, "4.0⭐ +": 4.0, "4.5⭐ +": 4.5, "4.8⭐ +": 4.8, "5.0⭐ only": 5.0}
+    min_rating_label = st.selectbox("Min Rating", list(rating_options.keys()))
+    min_rating = rating_options[min_rating_label]
 
 with col5:
     superhost = st.checkbox("Superhost only", value=False)
@@ -350,7 +352,7 @@ if search_clicked and search_input.strip():
     matched_filters = {
         'room_type': room_types if room_types else None,
         'superhost': superhost if superhost else None,
-        'min_price': min_price if min_price > 0 else None,
+        'min_rating': min_rating if min_rating > 0 else None,
         'max_price': max_price if max_price < 1000 else None,
         'min_rating': min_rating if min_rating > 0 else None,
         'neighbourhood': selected_neighbourhoods if selected_neighbourhoods else None,
