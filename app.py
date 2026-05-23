@@ -335,7 +335,7 @@ search_input = st.text_input(
 )
 
 # Filters row
-col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 1.5, 1])
+col1, col2, col3, col4, = st.columns([2, 2, 2, 1.5])
 
 with col1:
     room_type_options = ["Any", "Entire home/apt", "Private room", "Shared room"]
@@ -351,8 +351,7 @@ with col3:
 with col4:
     superhost = st.checkbox("Superhost only", value=False)
 
-with col5:
-    top_k = st.selectbox("Results", [5, 10, 15, 20], index=1)
+top_k = 5
 
 search_clicked = st.button("Search →", use_container_width=False)
 
