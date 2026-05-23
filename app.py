@@ -137,6 +137,16 @@ div[data-testid="stSlider"] label {
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
 }
+div[data-testid="stMultiSelect"] label,
+div[data-testid="stSlider"] label,
+div[data-testid="stCheckbox"] label {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    color: #2C4A3E !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
 .result-count {
     font-family: 'Fraunces', serif;
     font-size: 1.1rem;
@@ -333,10 +343,10 @@ with col3:
     min_price, max_price = st.slider("Price", 0, 1000, (0, 300), step=10, format="$%d", label_visibility="collapsed")
 
 with col4:
-    superhost = st.checkbox("Superhost only", value=False)
+    min_rating = st.slider("Min Rating", 0.0, 5.0, 4.0, step=0.1, format="%.1f⭐")
 
 with col5:
-    min_rating = st.slider("Min Rating", 0.0, 5.0, 4.0, step=0.1, format="%.1f⭐")
+    superhost = st.checkbox("Superhost only", value=False)
 
 top_k = 10
 search_clicked = st.button("Search →")
