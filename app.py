@@ -319,14 +319,15 @@ if search_clicked and search_input.strip():
 
     st.markdown(f'<div class="result-count">Found {len(results)} listings for you.</div>', unsafe_allow_html=True)
 
-    map_col, cards_col = st.columns([1.2, 1])
+    cards_col, map_col = st.columns([1.2, 1])
 
     with map_col:
         map_data = results[['latitude', 'longitude', 'name']].dropna()
-        st.map(map_data, zoom=12, use_container_width=True)
+        st.map(map_data, zoom=11, use_container_width=True)
 
     with cards_col:
         st.markdown("#### Top Results")
+        st.markdown('<div style="height:700px; overflow-y:auto; padding-right:8px;">', unsafe_allow_html=True)
         for i, (_, row) in enumerate(results.iterrows()):
             with st.container(border=True):
                 img_url = row.get('picture_url', '')
@@ -353,6 +354,7 @@ if search_clicked and search_input.strip():
                     st.info(f"💬 {reason}")
 
                 st.markdown(f"[View on Airbnb →]({row.get('listing_url', '#')})")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 elif search_clicked and not search_input.strip():
     st.info("Please enter a search query.")
