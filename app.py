@@ -259,7 +259,7 @@ Listing:
 - Description: {desc_text}
 - Recent reviews: {review_text}
 
-Reference what guests actually said if relevant. 2 sentences max.
+Reference what guests actually said if relevant. 2 sentences max. Only mention price if it is under $150/night or if the user specifically asked about price.
 """
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
