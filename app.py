@@ -323,7 +323,8 @@ if search_clicked and search_input.strip():
 
     with map_col:
         map_data = results[['latitude', 'longitude', 'name']].dropna()
-        st.map(map_data, zoom=11, use_container_width=True)
+        st.markdown("#### &nbsp;")
+        st.map(map_data, zoom=11, use_container_width=True, height=700)
 
     with cards_col:
         st.markdown("#### Top Results")
