@@ -411,7 +411,7 @@ if search_clicked and search_input.strip():
                                 reason = reason.encode('utf-8', errors='ignore').decode('utf-8')
                                 reason = reason.replace('$', '\\$')
                                 st.info(f"💬 {reason}")
-                            except Exception:
+                            except Exception as e:
                                 st.warning(f"⚠️ {str(e)}")
 
                     st.markdown(f"[View on Airbnb →]({row.get('listing_url', '#')})")
