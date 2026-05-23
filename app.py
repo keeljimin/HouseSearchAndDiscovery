@@ -327,8 +327,8 @@ if search_clicked and search_input.strip():
 
     with cards_col:
         st.markdown("#### Top Results")
-        st.markdown('<div style="height:700px; overflow-y:auto; padding-right:8px;">', unsafe_allow_html=True)
-        for i, (_, row) in enumerate(results.iterrows()):
+        with st.container(height=700):
+            for i, (_, row) in enumerate(results.iterrows()):
             with st.container(border=True):
                 img_url = row.get('picture_url', '')
                 if img_url:
