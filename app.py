@@ -130,16 +130,10 @@ h1, h2, h3 { font-family: 'Fraunces', serif; }
     background-color: #555555 !important;
 }
 div[data-testid="stSelectbox"] label,
-div[data-testid="stSlider"] label {
-    font-size: 0.8rem !important;
-    font-weight: 500 !important;
-    color: #2C4A3E !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-}
 div[data-testid="stMultiSelect"] label,
 div[data-testid="stSlider"] label,
-div[data-testid="stCheckbox"] label {
+div[data-testid="stCheckbox"] label,
+div[data-testid="stCheckbox"] p {
     font-family: 'DM Sans', sans-serif !important;
     font-size: 0.8rem !important;
     font-weight: 500 !important;
@@ -321,7 +315,7 @@ search_input = st.text_input(
     label_visibility="collapsed"
 )
 
-col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 1.5, 1])
+col1, col2, col3, col4, col5 = st.columns([2.5, 2.5, 2, 2, 1.5])
 
 with col1:
     room_types = st.multiselect(
