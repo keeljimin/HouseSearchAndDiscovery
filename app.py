@@ -294,6 +294,7 @@ Rules:
 - If NO conditions are matched at all, start with: "There are no listings in Seattle that match all your criteria, but this one stands out for [strength]."
 - Only mention price if the user's max price filter is $150 or under (user's max price: {matched_filters.get('max_price', 'not set')}) OR if the user explicitly used words like "cheap", "budget", "affordable". Otherwise, NEVER mention price.
 - Reference what guests actually said if relevant.
+- If the user mentions transit or safety, do NOT just rely on what the listing claims. Only mention it if multiple reviews confirm it.
 - If the user mentioned a landmark, restaurant, grocery store, school, or office, check ONLY the listing description and reviews provided. If found word-for-word, mention it by name or quote the review. If not found, do not mention it at all. NEVER invent or assume nearby places from your own knowledge.
 - 2 sentences max.
 """
