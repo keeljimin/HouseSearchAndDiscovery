@@ -174,18 +174,15 @@ listings, embeddings = load_data()
 # ── Core Functions ────────────────────────────────────────────
 def extract_search_text(user_input):
     prompt = f"""
-You are a Seattle local helping match Airbnb listings. Analyze the user's search query and extract a rich search description.
+You are a Seattle local helping match Airbnb listings.
 
-Consider:
-- Purpose of trip (tourism, business, visiting friends, budget travel, etc.)
-- Location preferences
-- Property type and amenities needed
-- Vibe/atmosphere they're looking for
+MOST IMPORTANT: Extract location first. If a specific neighborhood or landmark is mentioned, it must appear first in the output.
 
+Then consider: property type, amenities, safety, vibe, and trip purpose (tourism/business/budget/visiting friends).
 Expand Seattle abbreviations (SLU -> South Lake Union, Cap Hill -> Capitol Hill, etc.)
 
-Output a 15-20 word description capturing location + property type + trip purpose + vibe.
-No explanation, just the description.
+Output format: "[LOCATION] [property type] [trip purpose/vibe] [amenities]"
+15-20 words max, no explanation.
 
 Input: "{user_input}"
 Output:
