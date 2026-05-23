@@ -174,11 +174,21 @@ listings, embeddings = load_data()
 # ── Core Functions ────────────────────────────────────────────
 def extract_search_text(user_input):
     prompt = f"""
-Extract the core search intent from this Airbnb search query in 10 words or less.
-Focus on: location, property type, amenities, vibe. Remove filler like "I want", "I will stay", dates.
+You are a Seattle local helping match Airbnb listings. Analyze the user's search query and extract a rich search description.
+
+Consider:
+- Purpose of trip (tourism, business, visiting friends, budget travel, etc.)
+- Location preferences
+- Property type and amenities needed
+- Vibe/atmosphere they're looking for
+
+Expand Seattle abbreviations (SLU -> South Lake Union, Cap Hill -> Capitol Hill, etc.)
+
+Output a 15-20 word description capturing location + property type + trip purpose + vibe.
+No explanation, just the description.
 
 Input: "{user_input}"
-Output (10 words max, no explanation):
+Output:
 """
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
