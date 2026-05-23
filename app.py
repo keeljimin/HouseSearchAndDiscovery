@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from huggingface_hub import login
 
 # ── Page Config ───────────────────────────────────────────────
 st.set_page_config(
@@ -163,7 +164,8 @@ def load_models():
 
 @st.cache_data
 def load_data():
-    listings = pd.read_csv("https://huggingface.co/datasets/keeljimin/HouseSearchAndDiscovery/resolve/main/listings_processed.csv")
+    login(token=st.secrets["HF_TOKEN"])
+    listings = pd.read_csv("hf://datasets/keeljimin/HouseSearchAndDiscovery/listings_processed.csv")
     embeddings = np.load('listing_embeddings.npy')
     listings['price_clean'] = listings['price'].replace(r'[\$,]', '', regex=True).astype(float)
     listings = listings.reset_index(drop=True)
