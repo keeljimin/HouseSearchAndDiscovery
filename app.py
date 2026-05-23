@@ -199,15 +199,15 @@ def search_listings(user_input, room_type=None, superhost=None, max_price=None, 
     mask = np.ones(len(listings), dtype=bool)
 
     if room_type:
-        mask &= (listings['room_type'] == room_type).values
+        mask &= (listings['room_type'].isin(room_type)).values
     if superhost:
         mask &= (listings['host_is_superhost'] == 't').values
-    if max_price and max_price > 0:
+    if min_price and min_price > 0:
+        mask &= (listings['price_clean'] >= min_price).values
+    if max_price and max_price < 1000:
         mask &= (listings['price_clean'] <= max_price).values
     if neighbourhood:
-        mask &= listings['neighbourhood_group_cleansed'].str.contains(
-            neighbourhood, case=False, na=False
-        ).values
+        mask &= listings['neighbourhood_group_cleansed'].isin(neighbourhood).values
 
     filtered_listings = listings[mask].reset_index(drop=True)
     filtered_embeddings = embeddings[mask]
@@ -309,19 +309,19 @@ search_input = st.text_input(
 col1, col2, col3, col4 = st.columns([2, 2, 2, 1.5])
 
 with col1:
-    st.markdown("**Room Type**")
-    room_types = []
-    if st.checkbox("Entire home/apt", value=False): room_types.append("Entire home/apt")
-    if st.checkbox("Private room", value=False): room_types.append("Private room")
-    if st.checkbox("Shared room", value=False): room_types.append("Shared room")
+    room_types = st.multiselect(
+        "Room Type",
+        options=["Entire home/apt", "Private room", "Shared room"],
+        default=[]
+    )
 
 with col2:
-    st.markdown("**Neighbourhood**")
     neighbourhood_groups = sorted(listings['neighbourhood_group_cleansed'].dropna().unique().tolist())
-    selected_neighbourhoods = []
-    for n in neighbourhood_groups:
-        if st.checkbox(n, value=False, key=f"nb_{n}"):
-            selected_neighbourhoods.append(n)
+    selected_neighbourhoods = st.multiselect(
+        "Neighbourhood",
+        options=neighbourhood_groups,
+        default=[]
+    )
 
 with col3:
     st.markdown("**Price / night**")
@@ -336,10 +336,11 @@ search_clicked = st.button("Search →")
 # ── Search Execution ──────────────────────────────────────────
 if search_clicked and search_input.strip():
     matched_filters = {
-        'room_type': room_type if room_type != "Any" else None,
+        'room_type': room_types if room_types else None,
         'superhost': superhost if superhost else None,
-        'max_price': max_price if max_price > 0 else None,
-        'neighbourhood': neighbourhood if neighbourhood != "Any" else None,
+        'min_price': min_price if min_price > 0 else None,
+        'max_price': max_price if max_price < 1000 else None,
+        'neighbourhood': selected_neighbourhoods if selected_neighbourhoods else None,
     }
 
     with st.spinner("Finding your perfect stay..."):
