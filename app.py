@@ -163,9 +163,7 @@ def load_models():
 
 @st.cache_data
 def load_data():
-    file_id = "1eNPJJztqgoPc1-yAJoD34ua1RoHR3gX7"
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    listings = pd.read_csv(url)
+    listings = pd.read_csv("https://huggingface.co/datasets/keeljimin/HouseSearchAndDiscovery/resolve/main/listings_processed.csv")
     embeddings = np.load('listing_embeddings.npy')
     listings['price_clean'] = listings['price'].replace(r'[\$,]', '', regex=True).astype(float)
     listings = listings.reset_index(drop=True)
