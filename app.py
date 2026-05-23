@@ -206,6 +206,8 @@ def search_listings(user_input, room_type=None, superhost=None, max_price=None, 
         mask &= (listings['price_clean'] >= min_price).values
     if max_price and max_price < 1000:
         mask &= (listings['price_clean'] <= max_price).values
+    if min_rating:
+        mask &= (listings['review_scores_rating'] >= min_rating).values
     if neighbourhood:
         mask &= listings['neighbourhood_group_cleansed'].isin(neighbourhood).values
 
@@ -309,7 +311,7 @@ search_input = st.text_input(
     label_visibility="collapsed"
 )
 
-col1, col2, col3, col4 = st.columns([2, 2, 2, 1.5])
+col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 1.5, 1])
 
 with col1:
     room_types = st.multiselect(
@@ -333,6 +335,9 @@ with col3:
 with col4:
     superhost = st.checkbox("Superhost only", value=False)
 
+with col5:
+    min_rating = st.slider("Min Rating", 0.0, 5.0, 4.0, step=0.1, format="%.1f⭐")
+
 top_k = 10
 search_clicked = st.button("Search →")
 
@@ -343,6 +348,7 @@ if search_clicked and search_input.strip():
         'superhost': superhost if superhost else None,
         'min_price': min_price if min_price > 0 else None,
         'max_price': max_price if max_price < 1000 else None,
+        'min_rating': min_rating if min_rating > 0 else None,
         'neighbourhood': selected_neighbourhoods if selected_neighbourhoods else None,
     }
 
