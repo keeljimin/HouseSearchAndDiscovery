@@ -321,6 +321,7 @@ if search_clicked and search_input.strip():
             if i < 3:
                 with st.spinner(f"Generating reason for #{i+1}..."):
                     reason = generate_reason(search_input, row, matched_filters)
+                reason = reason.replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
                 reason_html = f'<div class="card-reason">&#128172; {reason}</div>'
 
             img_html = f'<img class="card-img" src="{img_url}" onerror="this.style.display=\'none\'">' if img_url else ''
