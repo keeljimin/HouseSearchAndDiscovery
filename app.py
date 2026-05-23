@@ -406,14 +406,13 @@ if search_clicked and search_input.strip():
                     if i < 3:
                         with st.spinner("Generating reason..."):
                             try:
-                                time.sleep(1)
+                                time.sleep(2)
                                 reason = generate_reason(search_input, row, matched_filters)
                                 reason = reason.encode('utf-8', errors='ignore').decode('utf-8')
                                 reason = reason.replace('$', '\\$')
                                 st.info(f"💬 {reason}")
                             except Exception:
-                                st.warning("🤖 AI is a little busy right now. Please try again in a moment!")
-                                st.stop()
+                                st.warning(f"⚠️ {str(e)}")
 
                     st.markdown(f"[View on Airbnb →]({row.get('listing_url', '#')})")
 
