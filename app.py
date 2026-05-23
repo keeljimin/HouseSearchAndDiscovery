@@ -205,7 +205,7 @@ def search_listings(user_input, room_type=None, superhost=None, max_price=None, 
     if max_price and max_price > 0:
         mask &= (listings['price_clean'] <= max_price).values
     if neighbourhood:
-        mask &= listings['neighbourhood_cleansed'].str.contains(
+        mask &= listings['neighbourhood_group_cleansed'].str.contains(
             neighbourhood, case=False, na=False
         ).values
 
@@ -230,16 +230,35 @@ def search_listings(user_input, room_type=None, superhost=None, max_price=None, 
 
 def generate_reason(user_input, row, matched_filters):
     matched = []
-    if matched_filters.get('max_price'):
-        matched.append(f"under ${matched_filters['max_price']}")
-    if matched_filters.get('superhost') and row.get('host_is_superhost') == 't':
-        matched.append("superhost")
-    if matched_filters.get('neighbourhood'):
-        matched.append(f"near {matched_filters['neighbourhood']}")
-    if matched_filters.get('room_type'):
-        matched.append(matched_filters['room_type'])
+    unmatched = []
 
-    matched_str = ', '.join(matched) if matched else 'general preferences'
+    if matched_filters.get('room_type'):
+        if row.get('room_type') == matched_filters['room_type']:
+            matched.append(matched_filters['room_type'])
+        else:
+            unmatched.append(matched_filters['room_type'])
+
+    if matched_filters.get('superhost'):
+        if row.get('host_is_superhost') == 't':
+            matched.append("superhost")
+        else:
+            unmatched.append("superhost")
+
+    if matched_filters.get('max_price'):
+        if row.get('price_clean', 0) <= matched_filters['max_price']:
+            matched.append(f"under ${matched_filters['max_price']}")
+        else:
+            unmatched.append(f"under ${matched_filters['max_price']}")
+
+    if matched_filters.get('neighbourhood'):
+        if matched_filters['neighbourhood'].lower() in str(row.get('neighbourhood_group_cleansed', '')).lower():
+            matched.append(f"near {matched_filters['neighbourhood']}")
+        else:
+            unmatched.append(f"near {matched_filters['neighbourhood']}")
+
+    matched_str = ', '.join(matched) if matched else 'none'
+    unmatched_str = ', '.join(unmatched) if unmatched else 'none'
+
     desc = row.get('description')
     desc_text = str(desc)[:300] if pd.notna(desc) else 'No description available'
     review = row.get('review_text')
@@ -250,6 +269,7 @@ You are a helpful Airbnb assistant. Explain why this listing is a good match in 
 
 User's request: "{user_input}"
 Matched conditions: {matched_str}
+Unmet conditions: {unmatched_str}
 
 Listing:
 - Name: {row.get('name', '')}
@@ -259,7 +279,13 @@ Listing:
 - Description: {desc_text}
 - Recent reviews: {review_text}
 
-Reference what guests actually said if relevant. 2 sentences max. Only mention price if it is under $150/night or if the user specifically asked about price.
+Rules:
+- If some conditions are matched, mention them specifically.
+- If some conditions are NOT met, acknowledge it naturally: "Although it's not [unmet condition], it stands out for [strength]."
+- If NO conditions are matched at all, start with: "There are no listings in Seattle that match all your criteria, but this one stands out for [strength]."
+- Only mention price if it is under $150/night or if the user specifically asked about price.
+- Reference what guests actually said if relevant.
+- 2 sentences max.
 """
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
@@ -286,8 +312,8 @@ with col1:
     room_type = st.selectbox("Room Type", room_type_options)
 
 with col2:
-    neighbourhoods = ["Any"] + sorted(listings['neighbourhood_cleansed'].dropna().unique().tolist())
-    neighbourhood = st.selectbox("Neighbourhood", neighbourhoods)
+    neighbourhood_groups = ["Any"] + sorted(listings['neighbourhood_group_cleansed'].dropna().unique().tolist())
+    neighbourhood = st.selectbox("Neighbourhood", neighbourhood_groups)
 
 with col3:
     max_price = st.slider("Max Price / night", 0, 1000, 300, step=10, format="$%d")
