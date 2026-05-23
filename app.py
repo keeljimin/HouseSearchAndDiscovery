@@ -326,10 +326,11 @@ with col1:
 
 with col2:
     neighbourhood_groups = sorted(listings['neighbourhood_group_cleansed'].dropna().unique().tolist())
+    select_all = st.checkbox("Select All", value=False, key="select_all_nb")
     selected_neighbourhoods = st.multiselect(
         "Neighbourhood",
         options=neighbourhood_groups,
-        default=[]
+        default=neighbourhood_groups if select_all else []
     )
 
 with col3:
