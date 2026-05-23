@@ -20,7 +20,7 @@ st.markdown("""
     --cream: #F5F0E8;
     --forest: #2C4A3E;
     --sage: #7A9E8E;
-    --rust: #C4622D;
+    --grey: #555555;
     --warm-white: #FDFBF7;
     --charcoal: #2A2A2A;
     --light-sage: #E8F0EC;
@@ -82,7 +82,7 @@ h1, h2, h3 { font-family: 'Fraunces', serif; }
 .card-price {
     font-size: 1.1rem;
     font-weight: 500;
-    color: #C4622D;
+    color: #555555;
 }
 .card-rating {
     font-size: 0.85rem;
@@ -110,7 +110,7 @@ h1, h2, h3 { font-family: 'Fraunces', serif; }
 }
 .superhost-badge {
     display: inline-block;
-    background: #C4622D;
+    background: #555555;
     color: white;
     font-size: 0.72rem;
     padding: 2px 8px;
@@ -127,7 +127,7 @@ h1, h2, h3 { font-family: 'Fraunces', serif; }
     font-weight: 500 !important;
 }
 .stButton > button:hover {
-    background-color: #C4622D !important;
+    background-color: #555555 !important;
 }
 div[data-testid="stSelectbox"] label,
 div[data-testid="stSlider"] label {
@@ -251,10 +251,10 @@ def generate_reason(user_input, row, matched_filters):
             unmatched.append(f"under ${matched_filters['max_price']}")
 
     if matched_filters.get('neighbourhood'):
-        if matched_filters['neighbourhood'].lower() in str(row.get('neighbourhood_group_cleansed', '')).lower():
-            matched.append(f"near {matched_filters['neighbourhood']}")
+        if any(n.lower() in str(row.get('neighbourhood_group_cleansed', '')).lower() for n in matched_filters['neighbourhood']):
+            matched.append(f"near {', '.join(matched_filters['neighbourhood'])}")
         else:
-            unmatched.append(f"near {matched_filters['neighbourhood']}")
+            unmatched.append(f"near {', '.join(matched_filters['neighbourhood'])}")
 
     matched_str = ', '.join(matched) if matched else 'none'
     unmatched_str = ', '.join(unmatched) if unmatched else 'none'
