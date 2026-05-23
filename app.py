@@ -214,6 +214,9 @@ def search_listings(user_input, room_type=None, superhost=None, max_price=None, 
         mask &= (listings['review_scores_rating'] >= min_rating).values
     if neighbourhood:
         mask &= listings['neighbourhood_group_cleansed'].isin(neighbourhood).values
+        excluded = [n for n in listings['neighbourhood_group_cleansed'].dropna().unique() if n not in neighbourhood]
+        for ex in excluded:
+            mask &= ~listings['name'].str.contains(ex, case=False, na=False)
 
     filtered_listings = listings[mask].reset_index(drop=True)
     filtered_embeddings = embeddings[mask]
