@@ -172,7 +172,7 @@ def load_models():
     from sentence_transformers import SentenceTransformer
     from groq import Groq
     import os
-    groq_api_key = os.environ.get("GROQ_API_KEY", "")
+    groq_api_key = st.secrets["GROQ_API_KEY"]
     client = Groq(api_key=groq_api_key)
     model = SentenceTransformer('BAAI/bge-base-en-v1.5')
     return client, model
