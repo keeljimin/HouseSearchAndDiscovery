@@ -274,7 +274,9 @@ def search_listings(user_input, parsed, top_k=10):
     filtered_embeddings = embeddings[mask]
 
     if len(filtered_listings) == 0:
-        return None
+        print("No hard filter matches, falling back to similarity only")
+        filtered_listings = listings.copy().reset_index(drop=True)
+        filtered_embeddings = embeddings
 
     search_text = parsed.get('search_text', user_input)
     query_embedding = embed_model.encode([search_text], normalize_embeddings=True)
