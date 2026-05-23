@@ -302,49 +302,29 @@ if search_clicked and search_input.strip():
     with cards_col:
         st.markdown("#### Top Results")
         for i, (_, row) in enumerate(results.iterrows()):
-            img_url = row.get('picture_url', '')
-            name = row.get('name', 'Unnamed')
-            hood = row.get('neighbourhood_cleansed', '')
-            price = row.get('price', '')
-            rating = row.get('review_scores_rating', '')
-            is_superhost = row.get('host_is_superhost') == 't'
-            sim = row.get('similarity_score', 0)
-            listing_url = row.get('listing_url', '#')
-            room = row.get('room_type', '')
-            beds = row.get('beds', '')
-            baths = row.get('bathrooms_text', '')
+            with st.container(border=True):
+                img_url = row.get('picture_url', '')
+                if img_url:
+                    st.image(img_url, use_container_width=True)
 
-            superhost_badge = '<span class="superhost-badge">&#11088; Superhost</span>' if is_superhost else ''
-            sim_badge = f'<span class="similarity-badge">{sim:.0%} match</span>'
+                sim = row.get('similarity_score', 0)
+                is_superhost = row.get('host_is_superhost') == 't'
 
-            reason_html = ""
-            if i < 3:
-                with st.spinner(f"Generating reason for #{i+1}..."):
-                    reason = generate_reason(search_input, row, matched_filters)
-                reason = reason.replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
-                reason_html = f'<div class="card-reason">&#128172; {reason}</div>'
+                st.markdown(f"**{row.get('name', '')}** &nbsp; `{sim:.0%} match`")
+                st.caption(f"📍 {row.get('neighbourhood_cleansed', '')} · {row.get('room_type', '')} · 🛏 {row.get('beds', '')} beds · {row.get('bathrooms_text', '')}")
 
-            img_html = f'<img class="card-img" src="{img_url}" onerror="this.style.display=\'none\'">' if img_url else ''
+                cols = st.columns([1, 1, 1])
+                cols[0].markdown(f"**{row.get('price', '')}**")
+                cols[1].markdown(f"⭐ {row.get('review_scores_rating', '')}")
+                if is_superhost:
+                    cols[2].markdown("🏆 Superhost")
 
-            card_html = f"""
-<div class="listing-card">
-    {img_html}
-    <div class="card-body">
-        <div class="card-title">{name} {sim_badge}</div>
-        <div class="card-meta">&#128205; {hood} &nbsp;&middot;&nbsp; {room} &nbsp;&middot;&nbsp; &#128716; {beds} beds &nbsp;&middot;&nbsp; {baths}</div>
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-            <span class="card-price">{price}</span>
-            <span class="card-rating">&#11088; {rating}</span>
-            {superhost_badge}
-        </div>
-        {reason_html}
-        <div style="margin-top:0.8rem;">
-            <a href="{listing_url}" target="_blank" style="font-size:0.82rem; color:#2C4A3E; font-weight:500; text-decoration:none; border-bottom: 1px solid #7A9E8E;">View on Airbnb &#8594;</a>
-        </div>
-    </div>
-</div>
-"""
-            st.markdown(card_html, unsafe_allow_html=True)
+                if i < 3:
+                    with st.spinner("Generating reason..."):
+                        reason = generate_reason(search_input, row, matched_filters)
+                    st.info(f"💬 {reason}")
+
+                st.markdown(f"[View on Airbnb →]({row.get('listing_url', '#')})")
 
 elif search_clicked and not search_input.strip():
     st.info("Please enter a search query.")
