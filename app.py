@@ -179,8 +179,14 @@ def load_models():
 
 @st.cache_data
 def load_data():
-    listings = pd.read_csv('listings_processed.csv')
+    # Load CSV from Google Drive
+    file_id = "1eNPJJztqgoPc1-yAJoD34ua1RoHR3gX7"
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    listings = pd.read_csv(url)
+    
+    # Load npy from GitHub Repository
     embeddings = np.load('listing_embeddings.npy')
+    
     listings['price_clean'] = listings['price'].replace(r'[\$,]', '', regex=True).astype(float)
     listings = listings.reset_index(drop=True)
     return listings, embeddings
