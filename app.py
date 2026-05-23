@@ -172,6 +172,21 @@ listings, embeddings = load_data()
 
 
 # ── Core Functions ────────────────────────────────────────────
+def extract_search_text(user_input):
+    prompt = f"""
+Extract the core search intent from this Airbnb search query in 10 words or less.
+Focus on: location, property type, amenities, vibe. Remove filler like "I want", "I will stay", dates.
+
+Input: "{user_input}"
+Output (10 words max, no explanation):
+"""
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0
+    )
+    return response.choices[0].message.content.strip()
+    
 def search_listings(user_input, room_type=None, superhost=None, max_price=None, neighbourhood=None, top_k=10):
     # 하드 필터: UI에서 선택한 것만
     mask = np.ones(len(listings), dtype=bool)
@@ -196,7 +211,8 @@ def search_listings(user_input, room_type=None, superhost=None, max_price=None, 
         filtered_embeddings = embeddings
 
     # 유사도 검색
-    query_embedding = embed_model.encode([user_input], normalize_embeddings=True)
+    search_text = extract_search_text(user_input)
+    query_embedding = embed_model.encode([search_text], normalize_embeddings=True)
     similarities = cosine_similarity(query_embedding, filtered_embeddings)[0]
 
     top_indices = similarities.argsort()[::-1][:top_k]
