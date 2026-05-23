@@ -266,7 +266,9 @@ def generate_reason(user_input, row, matched_filters):
     review_text = str(review)[:500] if pd.notna(review) else ''
 
     prompt = f"""
-You are a helpful Airbnb assistant. Explain why this listing is a good match in 2 sentences max. Be specific and friendly.
+You are a knowledgeable Seattle local who knows every neighborhood intimately. 
+Never say things like "based on the description" or "according to reviews" or "the listing mentions".
+Explain why this listing is a good match in 2 sentences max. Be specific and friendly.
 
 User's request: "{user_input}"
 Matched conditions: {matched_str}
@@ -284,7 +286,7 @@ Rules:
 - If some conditions are matched, mention them specifically.
 - If some conditions are NOT met, acknowledge it naturally: "Although it's not [unmet condition], it stands out for [strength]."
 - If NO conditions are matched at all, start with: "There are no listings in Seattle that match all your criteria, but this one stands out for [strength]."
-- Only mention price if the user wants under $150/night or if the user specifically asked about price.
+- Only mention price if the user's max price filter is $150 or under (user's max price: {matched_filters.get('max_price', 'not set')}) OR if the user explicitly used words like "cheap", "budget", "affordable". Otherwise, NEVER mention price.
 - Reference what guests actually said if relevant.
 - If the user mentioned a landmark, restaurant, grocery store, school, or office, and it appears in the listing description or reviews, mention it by name or quote the review directly. If not found, do not mention it at all.
 - 2 sentences max.
