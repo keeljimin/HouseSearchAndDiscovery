@@ -285,6 +285,7 @@ Rules:
 - If NO conditions are matched at all, start with: "There are no listings in Seattle that match all your criteria, but this one stands out for [strength]."
 - Only mention price if it is under $150/night or if the user specifically asked about price.
 - Reference what guests actually said if relevant.
+- If the user mentioned a landmark, restaurant, grocery store, school, or office, and it appears in the listing description or reviews, mention it by name or quote the review directly. If not found, do not mention it at all.
 - 2 sentences max.
 """
     response = client.chat.completions.create(
