@@ -309,15 +309,23 @@ search_input = st.text_input(
 col1, col2, col3, col4 = st.columns([2, 2, 2, 1.5])
 
 with col1:
-    room_type_options = ["Any", "Entire home/apt", "Private room", "Shared room"]
-    room_type = st.selectbox("Room Type", room_type_options)
+    st.markdown("**Room Type**")
+    room_types = []
+    if st.checkbox("Entire home/apt", value=False): room_types.append("Entire home/apt")
+    if st.checkbox("Private room", value=False): room_types.append("Private room")
+    if st.checkbox("Shared room", value=False): room_types.append("Shared room")
 
 with col2:
-    neighbourhood_groups = ["Any"] + sorted(listings['neighbourhood_group_cleansed'].dropna().unique().tolist())
-    neighbourhood = st.selectbox("Neighbourhood", neighbourhood_groups)
+    st.markdown("**Neighbourhood**")
+    neighbourhood_groups = sorted(listings['neighbourhood_group_cleansed'].dropna().unique().tolist())
+    selected_neighbourhoods = []
+    for n in neighbourhood_groups:
+        if st.checkbox(n, value=False, key=f"nb_{n}"):
+            selected_neighbourhoods.append(n)
 
 with col3:
-    max_price = st.slider("Max Price / night", 0, 1000, 300, step=10, format="$%d")
+    st.markdown("**Price / night**")
+    min_price, max_price = st.slider("Price", 0, 1000, (0, 300), step=10, format="$%d", label_visibility="collapsed")
 
 with col4:
     superhost = st.checkbox("Superhost only", value=False)
