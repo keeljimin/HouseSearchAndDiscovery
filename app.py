@@ -5,6 +5,7 @@ import json
 import re
 import ast
 from sklearn.metrics.pairwise import cosine_similarity
+import streamlit.components.v1 as components
 
 # ── Page Config ───────────────────────────────────────────────
 st.set_page_config(
@@ -423,7 +424,7 @@ if search_clicked and search_input.strip():
     </div>
 </div>
 """
-                    st.markdown(card_html, unsafe_allow_html=True)
+                    components.html(card_html, height=400, scrolling=False)
 
 elif search_clicked and not search_input.strip():
     st.info("Please enter a search query.")
