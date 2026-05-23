@@ -323,6 +323,7 @@ if search_clicked and search_input.strip():
                     with st.spinner("Generating reason..."):
                         reason = generate_reason(search_input, row, matched_filters)
                     reason = reason.encode('utf-8', errors='ignore').decode('utf-8')
+                    reason = reason.replace('$', '\\$')
                     st.info(f"💬 {reason}")
 
                 st.markdown(f"[View on Airbnb →]({row.get('listing_url', '#')})")
