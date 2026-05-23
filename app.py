@@ -242,6 +242,8 @@ def generate_reason(user_input, row, matched_filters):
     matched_str = ', '.join(matched) if matched else 'general preferences'
     desc = row.get('description')
     desc_text = str(desc)[:300] if pd.notna(desc) else 'No description available'
+    review = row.get('review_text')
+    review_text = str(review)[:500] if pd.notna(review) else ''
 
     prompt = f"""
 You are a helpful Airbnb assistant. Explain why this listing is a good match in 2 sentences max. Be specific and friendly.
@@ -255,8 +257,9 @@ Listing:
 - Price: {row.get('price', '')}
 - Rating: {row.get('review_scores_rating', '')}
 - Description: {desc_text}
+- Recent reviews: {review_text}
 
-2 sentences max, reference matched conditions.
+Reference what guests actually said if relevant. 2 sentences max.
 """
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
