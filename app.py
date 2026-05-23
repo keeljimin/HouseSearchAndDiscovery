@@ -329,32 +329,31 @@ if search_clicked and search_input.strip():
         st.markdown("#### Top Results")
         with st.container(height=700):
             for i, (_, row) in enumerate(results.iterrows()):
-            with st.container(border=True):
-                img_url = row.get('picture_url', '')
-                if img_url:
-                    st.image(img_url, use_container_width=True)
+                with st.container(border=True):
+                    img_url = row.get('picture_url', '')
+                    if img_url:
+                        st.image(img_url, use_container_width=True)
 
-                sim = row.get('similarity_score', 0)
-                is_superhost = row.get('host_is_superhost') == 't'
+                    sim = row.get('similarity_score', 0)
+                    is_superhost = row.get('host_is_superhost') == 't'
 
-                st.markdown(f"**{row.get('name', '')}** &nbsp; `{sim:.0%} match`")
-                st.caption(f"📍 {row.get('neighbourhood_cleansed', '')} · {row.get('room_type', '')} · 🛏 {row.get('beds', '')} beds · {row.get('bathrooms_text', '')}")
+                    st.markdown(f"**{row.get('name', '')}** &nbsp; `{sim:.0%} match`")
+                    st.caption(f"📍 {row.get('neighbourhood_cleansed', '')} · {row.get('room_type', '')} · 🛏 {row.get('beds', '')} beds · {row.get('bathrooms_text', '')}")
 
-                cols = st.columns([1, 1, 1])
-                cols[0].markdown(f"**{row.get('price', '')}**")
-                cols[1].markdown(f"⭐ {row.get('review_scores_rating', '')}")
-                if is_superhost:
-                    cols[2].markdown("🏆 Superhost")
+                    cols = st.columns([1, 1, 1])
+                    cols[0].markdown(f"**{row.get('price', '')}**")
+                    cols[1].markdown(f"⭐ {row.get('review_scores_rating', '')}")
+                    if is_superhost:
+                        cols[2].markdown("🏆 Superhost")
 
-                if i < 3:
-                    with st.spinner("Generating reason..."):
-                        reason = generate_reason(search_input, row, matched_filters)
-                    reason = reason.encode('utf-8', errors='ignore').decode('utf-8')
-                    reason = reason.replace('$', '\\$')
-                    st.info(f"💬 {reason}")
+                    if i < 3:
+                        with st.spinner("Generating reason..."):
+                            reason = generate_reason(search_input, row, matched_filters)
+                        reason = reason.encode('utf-8', errors='ignore').decode('utf-8')
+                        reason = reason.replace('$', '\\$')
+                        st.info(f"💬 {reason}")
 
-                st.markdown(f"[View on Airbnb →]({row.get('listing_url', '#')})")
-        st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown(f"[View on Airbnb →]({row.get('listing_url', '#')})")
 
 elif search_clicked and not search_input.strip():
     st.info("Please enter a search query.")
