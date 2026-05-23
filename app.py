@@ -403,6 +403,7 @@ if search_clicked and search_input.strip():
                     if i < 3:
                         with st.spinner(f"Generating reason for #{i+1}..."):
                             reason = generate_reason(search_input, row, parsed)
+                        reason = reason.replace('"', '&quot;').replace("'", '&#39;')
                         reason_html = f'<div class="card-reason">💬 {reason}</div>'
 
                     card_html = f"""
