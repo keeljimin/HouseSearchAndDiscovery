@@ -233,10 +233,11 @@ def generate_reason(user_input, row, matched_filters):
     unmatched = []
 
     if matched_filters.get('room_type'):
-        if row.get('room_type') == matched_filters['room_type']:
-            matched.append(matched_filters['room_type'])
+        room_type_str = ', '.join(matched_filters['room_type'])
+        if row.get('room_type') in matched_filters['room_type']:
+            matched.append(room_type_str)
         else:
-            unmatched.append(matched_filters['room_type'])
+            unmatched.append(room_type_str)
 
     if matched_filters.get('superhost'):
         if row.get('host_is_superhost') == 't':
