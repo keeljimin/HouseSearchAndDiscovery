@@ -158,8 +158,8 @@ div[data-testid="stCheckbox"] p {
 @st.cache_resource
 def load_models():
     from sentence_transformers import SentenceTransformer
-    from groq import Groq
-    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+    from openai import OpenAI
+    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
     model = SentenceTransformer('BAAI/bge-base-en-v1.5')
     return client, model
 
@@ -188,14 +188,13 @@ Expand Seattle abbreviations (SLU -> South Lake Union, Cap Hill -> Capitol Hill,
 
 Output format: "[LOCATION] [property type] [trip purpose/vibe] [amenities]"
 15-20 words max, no explanation.
-Always output in English regardless of the input language.
 
 Input: "{user_input}"
 Output:
 """
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
             temperature=0
         )
@@ -287,9 +286,6 @@ def generate_reason(user_input, row, matched_filters):
     prompt = f"""
 You are a knowledgeable Seattle local. Write 2 sentences explaining why this listing suits the user.
 
-Detect the language of the user's request and respond in that same language.
-For example, if the request is in Korean, your entire response must be in Korean.
-
 Priority order when writing your reason:
 1. PRICE — only mention if the user set a low price filter (≤$150) or used words like "cheap/budget/affordable". Otherwise NEVER mention price.
 2. LOCATION — if neighbourhood doesn't match exactly, say it's close to or convenient for [matched area]. Never say "doesn't match" — frame it positively as a nearby alternative.
@@ -318,7 +314,7 @@ Rules:
     # Temperature 0.7: enough creativity to sound natural,
     # low enough to stay grounded in the listing data
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=""gpt-4o-mini"",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7
     )
