@@ -188,6 +188,7 @@ Expand Seattle abbreviations (SLU -> South Lake Union, Cap Hill -> Capitol Hill,
 
 Output format: "[LOCATION] [property type] [trip purpose/vibe] [amenities]"
 15-20 words max, no explanation.
+Always output in English regardless of the input language.
 
 Input: "{user_input}"
 Output:
@@ -240,69 +241,82 @@ def search_listings(user_input, room_type=None, superhost=None, max_price=None, 
 
 
 def generate_reason(user_input, row, matched_filters):
-    matched = []
-    unmatched = []
-
-    if matched_filters.get('room_type'):
-        room_type_str = ', '.join(matched_filters['room_type'])
-        if row.get('room_type') in matched_filters['room_type']:
-            matched.append(room_type_str)
+    # Extract only filters the user explicitly set (ignore None values)
+    active_filters = {k: v for k, v in matched_filters.items() if v is not None}
+    
+    # Build met/unmet condition lists based on active filters only
+    met, unmet = [], []
+    
+    if active_filters.get('room_type'):
+        if row.get('room_type') in active_filters['room_type']:
+            met.append(f"room type: {row.get('room_type')}")
         else:
-            unmatched.append(room_type_str)
-
-    if matched_filters.get('superhost'):
+            unmet.append(f"room type: {', '.join(active_filters['room_type'])}")
+    
+    if active_filters.get('neighbourhood'):
+        hood = str(row.get('neighbourhood_group_cleansed', ''))
+        if any(n.lower() in hood.lower() for n in active_filters['neighbourhood']):
+            met.append(f"neighbourhood: {hood}")
+        else:
+            # Frame as "nearby" rather than a hard mismatch —
+            # neighbourhood boundaries are fuzzy and adjacent areas often serve the same purpose
+            unmet.append(f"exact neighbourhood ({', '.join(active_filters['neighbourhood'])}), but nearby")
+    
+    if active_filters.get('superhost'):
         if row.get('host_is_superhost') == 't':
-            matched.append("superhost")
+            met.append("superhost")
         else:
-            unmatched.append("superhost")
+            unmet.append("superhost")
 
-    if matched_filters.get('max_price'):
-        if row.get('price_clean', 0) <= matched_filters['max_price']:
-            matched.append(f"under ${matched_filters['max_price']}")
+    # Price is only surfaced in the reason when the user is clearly budget-conscious:
+    # either they set a tight cap (≤$150) or used explicit budget language in their query.
+    # Mentioning price otherwise makes the reason feel transactional and irrelevant.
+    price_is_relevant = (
+        active_filters.get('max_price') and active_filters['max_price'] <= 150
+    ) or any(w in user_input.lower() for w in ['cheap', 'budget', 'affordable', '저렴', '싼'])
+    
+    if price_is_relevant and active_filters.get('max_price'):
+        if row.get('price_clean', 0) <= active_filters['max_price']:
+            met.append(f"under ${active_filters['max_price']}")
         else:
-            unmatched.append(f"under ${matched_filters['max_price']}")
+            unmet.append(f"under ${active_filters['max_price']}")
 
-    if matched_filters.get('neighbourhood'):
-        if any(n.lower() in str(row.get('neighbourhood_group_cleansed', '')).lower() for n in matched_filters['neighbourhood']):
-            matched.append(f"near {', '.join(matched_filters['neighbourhood'])}")
-        else:
-            unmatched.append(f"near {', '.join(matched_filters['neighbourhood'])}")
-
-    matched_str = ', '.join(matched) if matched else 'none'
-    unmatched_str = ', '.join(unmatched) if unmatched else 'none'
-
-    desc = row.get('description')
-    desc_text = str(desc)[:300] if pd.notna(desc) else 'No description available'
-    review = row.get('review_text')
-    review_text = str(review)[:500] if pd.notna(review) else ''
+    met_str = ', '.join(met) if met else 'none'
+    unmet_str = ', '.join(unmet) if unmet else 'none'
 
     prompt = f"""
-You are a knowledgeable Seattle local who knows every neighborhood intimately. 
-Never say things like "based on the description" or "according to reviews" or "the listing mentions".
-Explain why this listing is a good match in 2 sentences max. Be specific and friendly.
+You are a knowledgeable Seattle local. Write 2 sentences explaining why this listing suits the user.
+
+Detect the language of the user's request and respond in that same language.
+For example, if the request is in Korean, your entire response must be in Korean.
+
+Priority order when writing your reason:
+1. PRICE — only mention if the user set a low price filter (≤$150) or used words like "cheap/budget/affordable". Otherwise NEVER mention price.
+2. LOCATION — if neighbourhood doesn't match exactly, say it's close to or convenient for [matched area]. Never say "doesn't match" — frame it positively as a nearby alternative.
+3. OTHER requests — only address conditions the user explicitly asked for. NEVER invent or mention conditions the user didn't request.
 
 User's request: "{user_input}"
-Matched conditions: {matched_str}
-Unmet conditions: {unmatched_str}
+Conditions met: {met_str}
+Conditions NOT met: {unmet_str}
 
 Listing:
 - Name: {row.get('name', '')}
 - Neighbourhood: {row.get('neighbourhood_cleansed', '')}
 - Price: {row.get('price', '')}
 - Rating: {row.get('review_scores_rating', '')}
-- Description: {desc_text}
-- Recent reviews: {review_text}
+- Description: {str(row.get('description', ''))[:300]}
+- Reviews: {str(row.get('review_text', ''))[:500]}
 
 Rules:
-- If some conditions are matched, mention them specifically.
-- If some conditions are NOT met, acknowledge it naturally: "Although it's not [unmet condition], it stands out for [strength]."
-- If NO conditions are matched at all, start with: "There are no listings in Seattle that match all your criteria, but this one stands out for [strength]."
-- Only mention price if the user's max price filter is $150 or under (user's max price: {matched_filters.get('max_price', 'not set')}) OR if the user explicitly used words like "cheap", "budget", "affordable". Otherwise, NEVER mention price.
-- Reference what guests actually said if relevant.
-- If the user mentions transit or safety, do NOT just rely on what the listing claims. Only mention it if multiple reviews confirm it.
-- If the user mentioned a landmark, restaurant, grocery store, school, or office, check ONLY the listing description and reviews provided. If found word-for-word, mention it by name or quote the review. If not found, do not mention it at all. NEVER invent or assume nearby places from your own knowledge.
+- If unmet conditions exist, acknowledge naturally: "While it's not [X], it excels at [strength]."
+- If NO active filters at all: focus purely on what the listing offers that matches the user's text query.
+- NEVER mention conditions the user didn't set. If user didn't ask about parking, don't mention parking.
+- For location, NEVER just say "not in [neighbourhood]" — instead say "just [X] minutes from [neighbourhood]" if reviews/description support it, or simply highlight the listing's own area strengths.
+- Do not say "based on the description" or "according to reviews".
 - 2 sentences max.
 """
+    # Temperature 0.7: enough creativity to sound natural,
+    # low enough to stay grounded in the listing data
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
@@ -354,12 +368,15 @@ top_k = 10
 search_clicked = st.button("Search →")
 
 # ── Search Execution ──────────────────────────────────────────
+price_filter_active = (min_price > 0 or max_price < 1000)
+
 if search_clicked and search_input.strip():
     matched_filters = {
         'room_type': room_types if room_types else None,
         'superhost': superhost if superhost else None,
         'min_rating': min_rating if min_rating > 0 else None,
-        'max_price': max_price if max_price < 1000 else None,
+        'max_price': max_price if price_filter_active else None,
+        'min_price': min_price if price_filter_active else None,
         'min_rating': min_rating if min_rating > 0 else None,
         'neighbourhood': selected_neighbourhoods if selected_neighbourhoods else None,
     }
