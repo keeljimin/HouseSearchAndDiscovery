@@ -3,5 +3,5 @@ pandas
 numpy
 scikit-learn
 sentence-transformers
-groq
+openai
 huggingface_hub
